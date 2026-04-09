@@ -4,27 +4,54 @@ class Game {
     this.wordElement = container.querySelector('.word');
     this.winsElement = container.querySelector('.status__wins');
     this.lossElement = container.querySelector('.status__loss');
+    this.timerElement = container.querySelector('.status__timer');
 
+    this.timerId = null;
     this.reset();
-
     this.registerEvents();
   }
 
   reset() {
+    clearInterval(this.timerId);
     this.setNewWord();
     this.winsElement.textContent = 0;
     this.lossElement.textContent = 0;
   }
 
   registerEvents() {
-    /*
-      TODO:
-      Написать обработчик события, который откликается
-      на каждый введённый символ.
-      В случае правильного ввода символа вызываем this.success()
-      При неправильном вводе символа - this.fail();
-      DOM-элемент текущего символа находится в свойстве this.currentSymbol.
-     */
+    document.addEventListener('keydown', (event) => {
+      if (!this.currentSymbol) return;
+
+      const charExpected = this.currentSymbol.textContent.toLowerCase();
+      const charPressed = event.key.toLowerCase();
+
+      if (charPressed === charExpected) {
+        this.success();
+      } else {
+        // (This prevents the user from losing if he presses Shift, Alt, etc.)
+        if (event.key.length === 1) {
+          this.fail();
+        }
+      }
+    });
+  }
+
+  startTimer(seconds) {
+    clearInterval(this.timerId);
+    this.timerId = null;
+    
+    this.timerElement.textContent = seconds;
+
+    this.timerId = setInterval(() => {
+      let currentTime = parseInt(this.timerElement.textContent);
+      currentTime -= 1;
+      this.timerElement.textContent = currentTime;
+
+      if (currentTime <= 0) {
+        clearInterval(this.timerId);
+        this.fail();
+      }
+    }, 1000);
   }
 
   success() {
@@ -37,6 +64,8 @@ class Game {
       return;
     }
 
+    clearInterval(this.timerId); 
+
     if (++this.winsElement.textContent === 10) {
       alert('Победа!');
       this.reset();
@@ -45,6 +74,8 @@ class Game {
   }
 
   fail() {
+    clearInterval(this.timerId); 
+
     if (++this.lossElement.textContent === 5) {
       alert('Вы проиграли!');
       this.reset();
@@ -56,6 +87,8 @@ class Game {
     const word = this.getWord();
 
     this.renderWord(word);
+
+    this.startTimer(word.length);
   }
 
   getWord() {
