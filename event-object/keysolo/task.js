@@ -74,16 +74,23 @@ class Game {
   }
 
   fail() {
+    this.wordElement.classList.add('word_incorrect');
+
     clearInterval(this.timerId); 
 
     if (++this.lossElement.textContent === 5) {
       alert('Вы проиграли!');
       this.reset();
     }
-    this.setNewWord();
+
+    setTimeout(() => {
+        this.setNewWord();
+      }, 1000);
   }
 
   setNewWord() {
+    this.wordElement.classList.remove('word_incorrect');
+
     const word = this.getWord();
 
     this.renderWord(word);
