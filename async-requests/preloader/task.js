@@ -26,14 +26,25 @@ if (cachedData) {
     loader.classList.remove('loader_active');
 }
 
-// Make request to server
-fetch(url)
-    .then(response => response.json())
-    .then(data => {
+// Request XHR
+const xhr = new XMLHttpRequest();
+xhr.open('GET', url);
+xhr.responseType = 'json';
+xhr.send();
+
+xhr.onload = function() {
+    if (xhr.status === 200) {
+        const data = xhr.response;
         localStorage.setItem('currency_cache', JSON.stringify(data));
         renderCurrencies(data);
-    })
-    .catch(error => console.error('Error al cargar datos:', error))
-    .finally(() => {
-        loader.classList.remove('loader_active');
-    });
+    } else {
+        console.error(`Error ${xhr.status}: ${xhr.statusText}`);
+    }
+    loader.classList.remove('loader_active');
+};
+
+// Network error handling
+xhr.onerror = function() {
+    console.error("Connection error");
+    loader.classList.remove('loader_active');
+};
